@@ -1,0 +1,5 @@
+{
+  "name": "Generador de TDR Inteligente",
+  "description": "Genera Términos de Referencia (TDR) formales usando IA, con soporte para análisis de CV, ejemplos personalizados y exportación a Word (.docx).",
+  "requestFramePermissions": []
+}
