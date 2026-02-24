@@ -38,6 +38,8 @@ frontend/.env
 .env.test.local
 .env.production.local
 
+backend/src/main/resources/application.properties
+
 # ========================
 # IDEs
 # ========================

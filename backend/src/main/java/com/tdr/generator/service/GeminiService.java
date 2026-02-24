@@ -1,16 +1,11 @@
 package com.tdr.generator.service;
 
 import com.tdr.generator.dto.TDRRequest;
-import com.tdr.generator.model.TDRData;
-import lombok.Value;
-import org.springframework.http.MediaType;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class GeminiService {
@@ -18,118 +13,149 @@ public class GeminiService {
     @Value("${gemini.api.key}")
     private String apiKey;
 
-    @Value("${gemini.api.url}")
+    @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent}")
     private String apiUrl;
 
     private final WebClient webClient;
-    private final ObjectMapper objectMapper;
 
-    public GeminiService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
+    public GeminiService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.build();
-        this.objectMapper = objectMapper;
     }
 
-    public TDRData generateTDR(TDRRequest request) {
+    public String generateTDR(TDRRequest request) {
         String prompt = buildPrompt(request);
 
-        // Construir el body para Gemini
-        Map<String, Object> body = Map.of(
-                "contents", List.of(Map.of(
-                        "parts", List.of(Map.of("text", prompt))
-                )),
-                "generationConfig", Map.of(
-                        "temperature", 0.7,
-                        "maxOutputTokens", 8192
-                )
-        );
+        String requestBody = """
+                {
+                  "contents": [{
+                    "parts": [{
+                      "text": %s
+                    }]
+                  }],
+                  "generationConfig": {
+                    "temperature": 0.7,
+                    "maxOutputTokens": 8192,
+                    "responseMimeType": "application/json"
+                  }
+                }
+                """.formatted(escapeJson(prompt));
 
-        // Llamar a Gemini
         String response = webClient.post()
-                .uri(apiUrl + "/models/gemini-1.5-pro:generateContent?key=" + apiKey)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(body)
+                .uri(apiUrl + "?key=" + apiKey)
+                .header("Content-Type", "application/json")
+                .bodyValue(requestBody)
                 .retrieve()
                 .bodyToMono(String.class)
                 .block();
 
-        // Extraer el texto del JSON de respuesta de Gemini
-        // y deserializarlo a TDRData
-        return parseGeminiResponse(response);
+        return extractTextFromResponse(response);
     }
 
     private String buildPrompt(TDRRequest request) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Eres un experto en redacción de Términos de Referencia (TDR) para la Superintendencia Nacional de Servicios de Saneamiento (SUNASS) del Perú.\n\n");
-        sb.append("Genera un TDR completo y profesional en formato JSON con la siguiente estructura exacta:\n\n");
-        sb.append("{\n");
-        sb.append("  \"organo\": \"string - Órgano o unidad orgánica que requiere el servicio\",\n");
-        sb.append("  \"actividadPoi\": \"string - Actividad del POI\",\n");
-        sb.append("  \"denominacion\": \"string - Denominación del servicio\",\n");
-        sb.append("  \"finalidadPublica\": \"string - Finalidad pública del servicio\",\n");
-        sb.append("  \"objetivo\": \"string - Objetivo general del servicio\",\n");
-        sb.append("  \"actividades\": [\"string array - Lista de actividades a realizar\"],\n");
-        sb.append("  \"perfil\": {\n");
-        sb.append("    \"requisitos\": [\"string array - Requisitos mínimos\"],\n");
-        sb.append("    \"formacion\": [\"string array - Formación académica requerida\"],\n");
-        sb.append("    \"experiencia\": \"string - Experiencia laboral requerida\"\n");
-        sb.append("  },\n");
-        sb.append("  \"lugar\": \"string - Lugar de prestación del servicio\",\n");
-        sb.append("  \"plazo\": \"string - Plazo de ejecución\",\n");
-        sb.append("  \"entregables\": [\n");
-        sb.append("    {\n");
-        sb.append("      \"numero\": number,\n");
-        sb.append("      \"descripcion\": \"string\",\n");
-        sb.append("      \"plazo\": \"string\"\n");
-        sb.append("    }\n");
-        sb.append("  ],\n");
-        sb.append("  \"pagos\": [\n");
-        sb.append("    {\n");
-        sb.append("      \"entregable\": \"string\",\n");
-        sb.append("      \"condicion\": \"string\",\n");
-        sb.append("      \"porcentaje\": \"string\"\n");
-        sb.append("    }\n");
-        sb.append("  ]\n");
-        sb.append("}\n\n");
 
-        sb.append("Datos del consultor (extraídos del CV):\n");
-        sb.append(request.getCvText()).append("\n\n");
+        sb.append("Eres un experto en redacción de Términos de Referencia (TDR) para SUNASS (Superintendencia Nacional de Servicios de Saneamiento) del Perú. ");
+        sb.append("Genera un TDR completo y formal en formato JSON con la siguiente estructura exacta:\\n\\n");
 
-        sb.append("Área de trabajo: ").append(request.getArea()).append("\n");
-        sb.append("Actividades requeridas: ").append(request.getActivities()).append("\n");
-        sb.append("Número de entregables: ").append(request.getNumEntregables()).append("\n\n");
+        sb.append("Área/Unidad Orgánica: ").append(request.getArea()).append("\\n");
+        sb.append("Actividades del servicio: ").append(request.getActivities()).append("\\n");
+        sb.append("Número de entregables: ").append(request.getNumEntregables()).append("\\n");
 
-        if (request.getExamples() != null && !request.getExamples().isBlank()) {
-            sb.append("Ejemplos de TDRs anteriores para referencia de estilo y formato:\n");
-            sb.append(request.getExamples()).append("\n\n");
+        if (request.getCvText() != null && !request.getCvText().isBlank()) {
+            sb.append("\\nPerfil del consultor (basado en CV adjunto):\\n");
+            // Limitar el CV a 2000 caracteres para no exceder límites
+            String cv = request.getCvText();
+            if (cv.length() > 2000) cv = cv.substring(0, 2000) + "...";
+            sb.append(cv).append("\\n");
         }
 
-        sb.append("IMPORTANTE: Responde ÚNICAMENTE con el JSON válido, sin texto adicional, sin bloques de código markdown, sin explicaciones. Solo el JSON puro.");
+        List<String> examples = request.getExamples();
+        if (examples != null && !examples.isEmpty()) {
+            sb.append("\\nEjemplos de TDRs anteriores para referencia de estilo y formato:\\n");
+            for (int i = 0; i < Math.min(examples.size(), 2); i++) {
+                String ex = examples.get(i);
+                if (ex.length() > 1000) ex = ex.substring(0, 1000) + "...";
+                sb.append("Ejemplo ").append(i + 1).append(": ").append(ex).append("\\n");
+            }
+        }
+
+        sb.append("""
+                
+                Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta (sin texto adicional):
+                {
+                  "organo": "nombre del órgano/unidad orgánica",
+                  "actividadPoi": "descripción de la actividad POI",
+                  "denominacion": "denominación formal de la contratación",
+                  "finalidadPublica": "texto de la finalidad pública",
+                  "objetivo": "objetivo de la contratación",
+                  "actividades": ["actividad 1", "actividad 2", ...],
+                  "perfil": {
+                    "requisitos": ["requisito 1", "requisito 2", ...],
+                    "formacion": ["formación académica requerida", ...],
+                    "experiencia": "descripción de experiencia requerida"
+                  },
+                  "lugar": "Lima, Perú - modalidad presencial/remota",
+                  "plazo": "X días calendarios",
+                  "entregables": [
+                    {"numero": 1, "descripcion": "descripción del entregable", "plazo": "X días"},
+                    ...
+                  ],
+                  "pagos": [
+                    {"entregable": "Entregable 1", "condicion": "A la aprobación del entregable 1", "porcentaje": "XX%"},
+                    ...
+                  ]
+                }
+                """);
 
         return sb.toString();
     }
 
-    private TDRData parseGeminiResponse(String response) {
-        JsonNode root = objectMapper.readTree(response);
-        String text = root.path("candidates")
-                .get(0)
-                .path("content")
-                .path("parts")
-                .get(0)
-                .path("text")
-                .asText();
+    private String escapeJson(String text) {
+        return "\"" + text
+                .replace("\\", "\\\\")
+                .replace("\"", "\\\"")
+                .replace("\n", "\\n")
+                .replace("\r", "\\r")
+                .replace("\t", "\\t")
+                + "\"";
+    }
 
-        // Remove Markdown code blocks if present
-        text = text.trim();
-        if (text.startsWith("```json")) {
-            text = text.substring(7);
-        } else if (text.startsWith("```")) {
-            text = text.substring(3);
+    private String extractTextFromResponse(String response) {
+        if (response == null) {
+            throw new RuntimeException("No se recibió respuesta de la API de Gemini");
         }
-        if (text.endsWith("```")) {
-            text = text.substring(0, text.length() - 3);
-        }
-        text = text.trim();
 
-        return objectMapper.readValue(text, TDRData.class);
+        // Extraer el texto del campo candidates[0].content.parts[0].text
+        int textStart = response.indexOf("\"text\":");
+        if (textStart == -1) {
+            throw new RuntimeException("Formato de respuesta inesperado: " + response.substring(0, Math.min(200, response.length())));
+        }
+
+        textStart += 8; // saltar '"text": '
+
+        // Encontrar el inicio del contenido (después de la comilla de apertura)
+        if (response.charAt(textStart) == '"') {
+            textStart++;
+        }
+
+        int textEnd = response.lastIndexOf("\"");
+        if (textEnd <= textStart) {
+            throw new RuntimeException("No se pudo extraer el texto de la respuesta");
+        }
+
+        String extracted = response.substring(textStart, textEnd);
+
+        // Decodificar secuencias de escape JSON
+        extracted = extracted
+                .replace("\\n", "\n")
+                .replace("\\r", "\r")
+                .replace("\\t", "\t")
+                .replace("\\\"", "\"")
+                .replace("\\\\", "\\");
+
+        // Limpiar posibles backticks de markdown
+        extracted = extracted.replaceAll("```json\\s*", "").replaceAll("```\\s*", "").trim();
+
+        return extracted;
     }
 }
