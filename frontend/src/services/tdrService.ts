@@ -1,20 +1,120 @@
-import { TDRData, TDRRequest } from '../types/tdr';
+import { GoogleGenAI, Type } from "@google/genai";
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+const MODEL_NAME = "gemini-3.1-pro-preview";
 
-export async function generateTDR(request: TDRRequest): Promise<TDRData> {
-  const response = await fetch(`${API_URL}/api/tdr/generate`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(request),
-  });
+export interface TDRData {
+    organo: string;
+    actividadPoi: string;
+    denominacion: string;
+    finalidadPublica: string;
+    objetivo: string;
+    actividades: string[];
+    perfil: {
+        requisitos: string[];
+        formacion: string[];
+        experiencia: string;
+    };
+    lugar: string;
+    plazo: string;
+    entregables: {
+        numero: number;
+        descripcion: string;
+        plazo: string;
+    }[];
+    pagos: {
+        entregable: string;
+        condicion: string;
+        porcentaje: string;
+    }[];
+}
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Error desconocido' }));
-    throw new Error(error.error || `HTTP error! status: ${response.status}`);
-  }
+type BackendError = { error?: string; message?: string };
 
-  return response.json();
+type GenerateTDRPayload = {
+    area: string;
+    activities: string;
+    numEntregables: number;
+    cvText?: string;
+    examples?: string[];
+};
+
+function getApiBaseUrl(): string {
+    // ✅ En Vite las env vars expuestas al browser deben iniciar con VITE_
+    const envUrl = import.meta.env.VITE_API_URL as string | undefined;
+    return envUrl?.trim() ? envUrl.trim() : "http://localhost:8080";
+}
+
+function safeJsonParse<T>(text: string): T | null {
+    try {
+        return JSON.parse(text) as T;
+    } catch {
+        return null;
+    }
+}
+
+function extractJson(text: string): string {
+    const cleaned = text
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+    // Intenta encontrar el primer { y el último }
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    if (start === -1 || end === -1 || end <= start) {
+        throw new Error("No se encontró un objeto JSON en la respuesta del backend.");
+    }
+    return cleaned.slice(start, end + 1);
+}
+
+export async function generateTDR(
+    activities: string,
+    area: string,
+    numEntregables: number,
+    cvText?: string,
+    examples?: string[]
+): Promise<TDRData> {
+    const baseUrl = getApiBaseUrl();
+    const endpoint = "/api/tdr/generate";
+
+    const payload: GenerateTDRPayload = {
+        area,
+        activities,
+        numEntregables,
+        cvText: cvText?.trim() ? cvText : undefined,
+        examples: examples && examples.length ? examples : undefined,
+    };
+
+    const res = await fetch(`${baseUrl}${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+    });
+
+    // Tu backend devuelve ResponseEntity<String>, por eso leemos texto sí o sí
+    const text = await res.text();
+
+    // Si el status no es OK, intenta leer error en JSON o en texto
+    if (!res.ok) {
+        const maybeError = safeJsonParse<BackendError>(text);
+        const msg = maybeError?.error || maybeError?.message || text || `Error ${res.status}`;
+        throw new Error(msg);
+    }
+
+    // OK: ahora intentamos parsear el JSON (aunque venga con fences o texto extra)
+    const jsonStr = extractJson(text);
+    const data = safeJsonParse<TDRData>(jsonStr);
+
+    if (!data) {
+        throw new Error(
+            `El backend respondió, pero no devolvió JSON válido. Primeros 200 chars:\n${text.slice(0, 200)}`
+        );
+    }
+
+    // Validación mínima
+    if (!data.organo || !data.denominacion || !Array.isArray(data.entregables)) {
+        throw new Error("El JSON recibido no tiene el formato esperado de TDRData.");
+    }
+
+    return data;
 }
