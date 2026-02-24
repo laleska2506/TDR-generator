@@ -4,6 +4,8 @@ import com.tdr.generator.dto.TDRRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -21,6 +23,8 @@ public class GeminiService {
     public GeminiService(WebClient.Builder webClientBuilder) {
         this.webClient = webClientBuilder.build();
     }
+
+    private final ObjectMapper mapper = new ObjectMapper();
 
     public String generateTDR(TDRRequest request) {
         String prompt = buildPrompt(request);
@@ -121,41 +125,45 @@ public class GeminiService {
     }
 
     private String extractTextFromResponse(String response) {
-        if (response == null) {
-            throw new RuntimeException("No se recibió respuesta de la API de Gemini");
+        try {
+            if (response == null || response.isBlank()) {
+                throw new RuntimeException("No se recibió respuesta de la API de Gemini");
+            }
+
+            JsonNode root = mapper.readTree(response);
+
+            // candidates[0].content.parts[*].text
+            JsonNode parts = root.path("candidates").path(0).path("content").path("parts");
+            if (!parts.isArray()) {
+                throw new RuntimeException("Formato inesperado de Gemini: faltan candidates[0].content.parts");
+            }
+
+            StringBuilder sb = new StringBuilder();
+            for (JsonNode p : parts) {
+                String t = p.path("text").asText("");
+                if (!t.isBlank()) sb.append(t);
+            }
+
+            String raw = sb.toString().trim();
+
+            // Limpia fences ```json ``` si el modelo lo manda
+            raw = raw.replaceAll("```json\\s*", "").replaceAll("```\\s*", "").trim();
+
+            // Recorta desde el primer { hasta el último }
+            int start = raw.indexOf("{");
+            int end = raw.lastIndexOf("}");
+            if (start < 0 || end < 0 || end <= start) {
+                throw new RuntimeException("Gemini no devolvió un JSON con llaves { }");
+            }
+
+            String jsonStr = raw.substring(start, end + 1);
+
+            // ✅ valida que sea JSON real
+            mapper.readTree(jsonStr);
+
+            return jsonStr;
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudo extraer JSON válido de Gemini: " + e.getMessage(), e);
         }
-
-        // Extraer el texto del campo candidates[0].content.parts[0].text
-        int textStart = response.indexOf("\"text\":");
-        if (textStart == -1) {
-            throw new RuntimeException("Formato de respuesta inesperado: " + response.substring(0, Math.min(200, response.length())));
-        }
-
-        textStart += 8; // saltar '"text": '
-
-        // Encontrar el inicio del contenido (después de la comilla de apertura)
-        if (response.charAt(textStart) == '"') {
-            textStart++;
-        }
-
-        int textEnd = response.lastIndexOf("\"");
-        if (textEnd <= textStart) {
-            throw new RuntimeException("No se pudo extraer el texto de la respuesta");
-        }
-
-        String extracted = response.substring(textStart, textEnd);
-
-        // Decodificar secuencias de escape JSON
-        extracted = extracted
-                .replace("\\n", "\n")
-                .replace("\\r", "\r")
-                .replace("\\t", "\t")
-                .replace("\\\"", "\"")
-                .replace("\\\\", "\\");
-
-        // Limpiar posibles backticks de markdown
-        extracted = extracted.replaceAll("```json\\s*", "").replaceAll("```\\s*", "").trim();
-
-        return extracted;
     }
 }

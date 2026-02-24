@@ -19,11 +19,14 @@ public class TDRController {
     @PostMapping("/generate")
     public ResponseEntity<String> generateTDR(@RequestBody TDRRequest request) {
         try {
-            String result = String.valueOf(geminiService.generateTDR(request));
-            return ResponseEntity.ok(result);
+            String result = geminiService.generateTDR(request);
+            return ResponseEntity.ok()
+                    .header("Content-Type", "application/json; charset=utf-8")
+                    .body(result);
         } catch (Exception e) {
             return ResponseEntity.internalServerError()
-                    .body("{\"error\": \"" + e.getMessage() + "\"}");
+                    .header("Content-Type", "application/json; charset=utf-8")
+                    .body("{\"error\":\"" + e.getMessage().replace("\"","'") + "\"}");
         }
     }
 }

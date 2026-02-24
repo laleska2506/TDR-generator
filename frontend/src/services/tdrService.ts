@@ -1,5 +1,3 @@
-import { GoogleGenAI, Type } from "@google/genai";
-
 const MODEL_NAME = "gemini-3.1-pro-preview";
 
 export interface TDRData {
