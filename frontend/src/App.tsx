@@ -23,9 +23,8 @@ function StepIndicator({ step }: { step: number }) {
   return (
     <div className="hidden sm:flex items-center gap-3">
       <div className="flex items-center gap-2">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-          step === 1 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-emerald-100 text-emerald-700'
-        }`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${step === 1 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-emerald-100 text-emerald-700'
+          }`}>
           {step > 1 ? <CheckCircle2 className="w-4 h-4" /> : '1'}
         </div>
         <span className={`text-xs font-bold uppercase tracking-wider transition-colors ${step === 1 ? 'text-emerald-700' : 'text-emerald-500'}`}>
@@ -34,9 +33,8 @@ function StepIndicator({ step }: { step: number }) {
       </div>
       <div className={`w-12 h-0.5 rounded-full transition-colors duration-500 ${step === 2 ? 'bg-emerald-500' : 'bg-black/10'}`} />
       <div className="flex items-center gap-2">
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-          step === 2 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-black/5 text-black/30'
-        }`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${step === 2 ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30' : 'bg-black/5 text-black/30'
+          }`}>
           2
         </div>
         <span className={`text-xs font-bold uppercase tracking-wider transition-colors ${step === 2 ? 'text-emerald-700' : 'text-black/30'}`}>
@@ -51,17 +49,17 @@ function StepIndicator({ step }: { step: number }) {
    MAIN APP
 ───────────────────────────────────────────── */
 export default function App() {
-  const [step, setStep]                     = useState(1);
-  const [loading, setLoading]               = useState(false);
-  const [area, setArea]                     = useState('');
-  const [activities, setActivities]         = useState('');
-  const [cvText, setCvText]                 = useState('');
-  const [cvName, setCvName]                 = useState('');
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [area, setArea] = useState('');
+  const [activities, setActivities] = useState('');
+  const [cvText, setCvText] = useState('');
+  const [cvName, setCvName] = useState('');
   const [numEntregables, setNumEntregables] = useState(2);
-  const [examples, setExamples]             = useState<{ name: string; text: string }[]>([]);
-  const [tdrData, setTdrData]               = useState<TDRData | null>(null);
-  const [isEditing, setIsEditing]           = useState(false);
-  const [error, setError]                   = useState<string | null>(null);
+  const [examples, setExamples] = useState<{ name: string; text: string }[]>([]);
+  const [tdrData, setTdrData] = useState<TDRData | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   /* ── File upload ── */
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isExample = false) => {
@@ -85,7 +83,7 @@ export default function App() {
           let full = '';
           for (let j = 1; j <= pdf.numPages; j++) {
             const page = await pdf.getPage(j);
-            const tc   = await page.getTextContent();
+            const tc = await page.getTextContent();
             full += tc.items.map((it: any) => it.str).join(' ') + '\n';
           }
           processText(full);
@@ -128,28 +126,6 @@ export default function App() {
       sections: [{
         properties: {},
         children: [
-          new Table({
-            width: { size: 9360, type: WidthType.DXA },
-            columnWidths: [1404, 7956],
-            borders: {
-              top: { style: BorderStyle.NONE }, bottom: { style: BorderStyle.SINGLE, size: 24, color: 'E30613' },
-              left: { style: BorderStyle.NONE }, right: { style: BorderStyle.NONE },
-              insideHorizontal: { style: BorderStyle.NONE }, insideVertical: { style: BorderStyle.NONE },
-            },
-            rows: [new TableRow({ children: [
-              new TableCell({ width: { size: 1404, type: WidthType.DXA }, shading: { fill: 'E30613' },
-                children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: 'SUNASS', color: 'FFFFFF', bold: true, size: 20 })] })],
-              }),
-              new TableCell({ width: { size: 7956, type: WidthType.DXA },
-                children: [new Paragraph({ children: [
-                  new TextRun({ text: '  SUPERINTENDENCIA NACIONAL DE', size: 16, bold: true }),
-                  new TextRun({ break: 1 }),
-                  new TextRun({ text: '  SERVICIOS DE SANEAMIENTO', size: 24, bold: true, color: 'E30613' }),
-                ]})],
-              }),
-            ]})],
-          }),
-          new Paragraph({ text: '' }),
           new Paragraph({
             heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER,
             children: [new TextRun({ text: 'TERMINOS DE REFERENCIA PARA LA CONTRATACION DE SERVICIOS Y CONSULTORIAS', bold: true, size: 28 })],
@@ -158,18 +134,24 @@ export default function App() {
           new Table({
             width: { size: 9360, type: WidthType.DXA }, columnWidths: [3120, 6240],
             rows: [
-              new TableRow({ children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Organo y/o Unidad Organica:', bold: true })] })] }),
-                new TableCell({ children: [new Paragraph(tdrData.organo)] }),
-              ]}),
-              new TableRow({ children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Actividad del POI / Accion Estrategica PEI:', bold: true })] })] }),
-                new TableCell({ children: [new Paragraph(tdrData.actividadPoi)] }),
-              ]}),
-              new TableRow({ children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Denominacion de la Contratacion:', bold: true })] })] }),
-                new TableCell({ children: [new Paragraph(tdrData.denominacion)] }),
-              ]}),
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Organo y/o Unidad Organica:', bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph(tdrData.organo)] }),
+                ]
+              }),
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Actividad del POI / Accion Estrategica PEI:', bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph(tdrData.actividadPoi)] }),
+                ]
+              }),
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Denominacion de la Contratacion:', bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph(tdrData.denominacion)] }),
+                ]
+              }),
             ],
           }),
           new Paragraph({ text: '' }),
@@ -197,16 +179,20 @@ export default function App() {
           new Table({
             width: { size: 9360, type: WidthType.DXA }, columnWidths: [936, 6552, 1872],
             rows: [
-              new TableRow({ children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'N', bold: true })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Entregable', bold: true })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Plazo', bold: true })] })] }),
-              ]}),
-              ...tdrData.entregables.map(e => new TableRow({ children: [
-                new TableCell({ children: [new Paragraph(String(e.numero))] }),
-                new TableCell({ children: [new Paragraph(e.descripcion)] }),
-                new TableCell({ children: [new Paragraph(e.plazo)] }),
-              ]})),
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'N', bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Entregable', bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Plazo', bold: true })] })] }),
+                ]
+              }),
+              ...tdrData.entregables.map(e => new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph(String(e.numero))] }),
+                  new TableCell({ children: [new Paragraph(e.descripcion)] }),
+                  new TableCell({ children: [new Paragraph(e.plazo)] }),
+                ]
+              })),
             ],
           }),
           new Paragraph({ text: '' }),
@@ -214,16 +200,20 @@ export default function App() {
           new Table({
             width: { size: 9360, type: WidthType.DXA }, columnWidths: [2340, 5616, 1404],
             rows: [
-              new TableRow({ children: [
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Entregable', bold: true })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Condicion', bold: true })] })] }),
-                new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '% de Pago', bold: true })] })] }),
-              ]}),
-              ...tdrData.pagos.map(p => new TableRow({ children: [
-                new TableCell({ children: [new Paragraph(p.entregable)] }),
-                new TableCell({ children: [new Paragraph(p.condicion)] }),
-                new TableCell({ children: [new Paragraph(p.porcentaje)] }),
-              ]})),
+              new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Entregable', bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: 'Condicion', bold: true })] })] }),
+                  new TableCell({ children: [new Paragraph({ children: [new TextRun({ text: '% de Pago', bold: true })] })] }),
+                ]
+              }),
+              ...tdrData.pagos.map(p => new TableRow({
+                children: [
+                  new TableCell({ children: [new Paragraph(p.entregable)] }),
+                  new TableCell({ children: [new Paragraph(p.condicion)] }),
+                  new TableCell({ children: [new Paragraph(p.porcentaje)] }),
+                ]
+              })),
             ],
           }),
           new Paragraph({ text: '' }),
@@ -291,11 +281,10 @@ export default function App() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setIsEditing(v => !v)}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full border text-xs font-bold transition-all ${
-                  isEditing
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full border text-xs font-bold transition-all ${isEditing
                     ? 'border-emerald-400 text-emerald-700 bg-emerald-50'
                     : 'border-black/10 text-black/55 hover:bg-black/5'
-                }`}
+                  }`}
               >
                 <Edit3 className="w-3.5 h-3.5" />
                 {isEditing ? 'Listo' : 'Editar'}
@@ -393,11 +382,10 @@ export default function App() {
                                 key={n}
                                 type="button"
                                 onClick={() => setNumEntregables(n)}
-                                className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-150 ${
-                                  numEntregables === n
+                                className={`flex-1 py-2.5 rounded-lg text-sm font-bold transition-all duration-150 ${numEntregables === n
                                     ? 'bg-white text-emerald-600 shadow-sm ring-1 ring-black/5'
                                     : 'text-black/30 hover:text-black/60'
-                                }`}
+                                  }`}
                               >
                                 {n}
                               </button>
@@ -451,11 +439,10 @@ export default function App() {
                             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                             accept=".pdf,.txt"
                           />
-                          <div className={`border-2 border-dashed rounded-2xl p-5 text-center transition-all duration-200 ${
-                            cvName
+                          <div className={`border-2 border-dashed rounded-2xl p-5 text-center transition-all duration-200 ${cvName
                               ? 'border-emerald-400 bg-emerald-50/60'
                               : 'border-black/10 group-hover:border-blue-300 group-hover:bg-blue-50/30'
-                          }`}>
+                            }`}>
                             {cvName ? (
                               <div className="flex items-center gap-3 justify-center">
                                 <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -522,9 +509,8 @@ export default function App() {
                               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                               accept=".pdf,.txt"
                             />
-                            <div className={`border-2 border-dashed border-black/10 rounded-2xl text-center group-hover:border-amber-400 group-hover:bg-amber-50/20 bg-black/[0.01] transition-all ${
-                              examples.length > 0 ? 'py-3' : 'py-5'
-                            }`}>
+                            <div className={`border-2 border-dashed border-black/10 rounded-2xl text-center group-hover:border-amber-400 group-hover:bg-amber-50/20 bg-black/[0.01] transition-all ${examples.length > 0 ? 'py-3' : 'py-5'
+                              }`}>
                               <Plus className="w-4 h-4 text-black/15 mx-auto mb-1" />
                               <p className="text-[9px] font-bold text-black/30 uppercase tracking-widest">
                                 {examples.length === 0 ? 'Añadir TDRs de referencia' : 'Añadir otro'}
@@ -619,16 +605,16 @@ export default function App() {
                       <nav className="space-y-0.5">
                         {[
                           { id: 'sec-header', label: 'Encabezado' },
-                          { id: 'sec-i',      label: 'I. Finalidad Pública' },
-                          { id: 'sec-ii',     label: 'II. Objetivo' },
-                          { id: 'sec-iii',    label: 'III. Alcances' },
-                          { id: 'sec-iv',     label: 'IV. Perfil Consultor' },
-                          { id: 'sec-v',      label: 'V. Lugar y Plazo' },
-                          { id: 'sec-vi',     label: 'VI. Entregables' },
-                          { id: 'sec-ix',     label: 'IX. Cond. de Pago' },
-                          { id: 'sec-x',      label: 'X. Confidencialidad' },
-                          { id: 'sec-xiii',   label: 'XIII. Penalidades' },
-                          { id: 'sec-xix',    label: 'XIX. Anticorrupción' },
+                          { id: 'sec-i', label: 'I. Finalidad Pública' },
+                          { id: 'sec-ii', label: 'II. Objetivo' },
+                          { id: 'sec-iii', label: 'III. Alcances' },
+                          { id: 'sec-iv', label: 'IV. Perfil Consultor' },
+                          { id: 'sec-v', label: 'V. Lugar y Plazo' },
+                          { id: 'sec-vi', label: 'VI. Entregables' },
+                          { id: 'sec-ix', label: 'IX. Cond. de Pago' },
+                          { id: 'sec-x', label: 'X. Confidencialidad' },
+                          { id: 'sec-xiii', label: 'XIII. Penalidades' },
+                          { id: 'sec-xix', label: 'XIX. Anticorrupción' },
                         ].map(item => (
                           <button
                             key={item.id}
@@ -762,7 +748,7 @@ export default function App() {
                                     <li key={idx} className="list-[lower-alpha]">
                                       {isEditing
                                         ? <input className="w-full bg-emerald-50 border border-emerald-200 rounded px-2 py-1 outline-none" value={req}
-                                            onChange={e => { const n = [...tdrData.perfil.requisitos]; n[idx] = e.target.value; updateTdrField('perfil', { ...tdrData.perfil, requisitos: n }); }} />
+                                          onChange={e => { const n = [...tdrData.perfil.requisitos]; n[idx] = e.target.value; updateTdrField('perfil', { ...tdrData.perfil, requisitos: n }); }} />
                                         : req}
                                     </li>
                                   ))}
@@ -775,14 +761,14 @@ export default function App() {
                                     <li key={idx} className="list-[lower-alpha]">
                                       {isEditing
                                         ? <input className="w-full bg-emerald-50 border border-emerald-200 rounded px-2 py-1 outline-none" value={form}
-                                            onChange={e => { const n = [...tdrData.perfil.formacion]; n[idx] = e.target.value; updateTdrField('perfil', { ...tdrData.perfil, formacion: n }); }} />
+                                          onChange={e => { const n = [...tdrData.perfil.formacion]; n[idx] = e.target.value; updateTdrField('perfil', { ...tdrData.perfil, formacion: n }); }} />
                                         : form}
                                     </li>
                                   ))}
                                   <li className="list-[lower-alpha]">
                                     {isEditing
                                       ? <input className="w-full bg-emerald-50 border border-emerald-200 rounded px-2 py-1 outline-none" value={tdrData?.perfil.experiencia ?? ''}
-                                          onChange={e => updateTdrField('perfil', { ...tdrData!.perfil, experiencia: e.target.value })} />
+                                        onChange={e => updateTdrField('perfil', { ...tdrData!.perfil, experiencia: e.target.value })} />
                                       : tdrData?.perfil.experiencia}
                                   </li>
                                 </ul>
@@ -824,13 +810,13 @@ export default function App() {
                                     <td className="border border-black p-2">
                                       {isEditing
                                         ? <input className="w-full bg-emerald-50 border border-emerald-200 rounded px-2 py-1 outline-none" value={ent.descripcion}
-                                            onChange={e => { const n = [...tdrData.entregables]; n[idx] = { ...n[idx], descripcion: e.target.value }; updateTdrField('entregables', n); }} />
+                                          onChange={e => { const n = [...tdrData.entregables]; n[idx] = { ...n[idx], descripcion: e.target.value }; updateTdrField('entregables', n); }} />
                                         : ent.descripcion}
                                     </td>
                                     <td className="border border-black p-2 text-center">
                                       {isEditing
                                         ? <input className="w-full bg-emerald-50 border border-emerald-200 rounded px-2 py-1 outline-none text-center" value={ent.plazo}
-                                            onChange={e => { const n = [...tdrData.entregables]; n[idx] = { ...n[idx], plazo: e.target.value }; updateTdrField('entregables', n); }} />
+                                          onChange={e => { const n = [...tdrData.entregables]; n[idx] = { ...n[idx], plazo: e.target.value }; updateTdrField('entregables', n); }} />
                                         : ent.plazo}
                                     </td>
                                   </tr>
@@ -873,21 +859,21 @@ export default function App() {
 
                           {/* Clauses X–XXIV */}
                           {([
-                            { id: 'sec-x',   num: 'X',     title: 'Confidencialidad', text: 'El contratista deberá mantener estricta confidencialidad sobre la información a la que tendrá acceso durante la ejecución del servicio. No podrá disponer de ésta para fines distintos al servicio. El proveedor podrá ser evaluado de acuerdo con los lineamientos de seguridad de la información de la SUNASS.' },
-                            { id: '',         num: 'XI',    title: 'Responsabilidad del Proveedor', text: 'El proveedor es responsable por la calidad ofrecida y por los vicios ocultos del servicio ofertado por un plazo no menor de un (01) año, contado a partir del día siguiente de la conformidad otorgada por la Entidad.' },
-                            { id: '',         num: 'XII',   title: 'Consideraciones Generales a los Productos', text: 'Los derechos intelectuales de los productos y documentos elaborados por el proveedor son propiedad de la Entidad, así como toda aquella información interna de la institución a la que tenga acceso para la ejecución del servicio.' },
-                            { id: 'sec-xiii', num: 'XIII',  title: 'Penalidades por Mora', text: null },
-                            { id: '',         num: 'XIV',   title: 'Resolución Contractual', text: 'Cualquiera de las partes puede resolver el contrato, de conformidad con el numeral 68.1 al 68.5 del artículo 68 de la Ley N° 32069, Ley General de Contrataciones Públicas, y el artículo 122 del Reglamento aprobado por D.S. N° 009-2025-EF.' },
-                            { id: '',         num: 'XV',    title: 'Sanciones', text: 'El proveedor se compromete a cumplir las obligaciones derivadas del contrato, siendo aplicable lo previsto según los artículos 87 al 92 de la Ley General de Contrataciones Públicas.' },
-                            { id: '',         num: 'XVI',   title: 'Aplicación Supletoria', text: 'A la Ley de Contrataciones y su Reglamento – Ley N° 32069 también se considera el Código Civil vigente, teniendo en cuenta ese orden de prelación.' },
-                            { id: '',         num: 'XVII',  title: 'Medidas de Seguridad en la Prestación del Servicio', text: 'No aplica.' },
-                            { id: '',         num: 'XVIII', title: 'Solución de Controversias', text: 'Todas las controversias se resuelven mediante conciliación, conforme al numeral 81.3 del artículo 81 de la Ley N° 32069 y el Art. 330 del Reglamento.' },
-                            { id: 'sec-xix',  num: 'XIX',   title: 'Obligación Anticorrupción', text: 'EL CONTRATISTA declara y garantiza no haber ofrecido, negociado ni prometido ningún pago o incentivo ilegal a los evaluadores del proceso o cualquier servidor de la entidad. Se obliga a mantener una conducta proba e íntegra durante y después de la vigencia del contrato.' },
-                            { id: '',         num: 'XX',    title: 'Cláusula Antisoborno', text: 'El contratista declara conocer la Política antisoborno de la SUNASS. Se compromete a actuar con integridad y a abstenerse de ofrecer beneficio alguno a funcionarios públicos. Se compromete a denunciar cualquier intento de soborno a través del canal de denuncias de la SUNASS.' },
-                            { id: '',         num: 'XXI',   title: 'Cláusula Gestión de Riesgo', text: 'LAS PARTES realizan la gestión de riesgos de acuerdo con lo establecido en el presente contrato y sus documentos, con el fin de tomar decisiones informadas durante la ejecución contractual.' },
-                            { id: '',         num: 'XXII',  title: 'Cláusula de Vicios Ocultos', text: 'El contratista es responsable por la calidad ofrecida y los vicios ocultos por un plazo no menor de un año contado a partir de la conformidad otorgada por la entidad. Art. 69.2 literal c).' },
-                            { id: '',         num: 'XXIII', title: 'Cláusula Modificación Contractual', text: 'Las partes pueden acordar modificaciones al contrato, siempre que permitan alcanzar su finalidad de manera oportuna y eficiente sin aumentar el monto ni desnaturalizar el requerimiento.' },
-                            { id: '',         num: 'XXIV',  title: 'Garantías', text: 'No aplica.' },
+                            { id: 'sec-x', num: 'X', title: 'Confidencialidad', text: 'El contratista deberá mantener estricta confidencialidad sobre la información a la que tendrá acceso durante la ejecución del servicio. No podrá disponer de ésta para fines distintos al servicio. El proveedor podrá ser evaluado de acuerdo con los lineamientos de seguridad de la información de la SUNASS.' },
+                            { id: '', num: 'XI', title: 'Responsabilidad del Proveedor', text: 'El proveedor es responsable por la calidad ofrecida y por los vicios ocultos del servicio ofertado por un plazo no menor de un (01) año, contado a partir del día siguiente de la conformidad otorgada por la Entidad.' },
+                            { id: '', num: 'XII', title: 'Consideraciones Generales a los Productos', text: 'Los derechos intelectuales de los productos y documentos elaborados por el proveedor son propiedad de la Entidad, así como toda aquella información interna de la institución a la que tenga acceso para la ejecución del servicio.' },
+                            { id: 'sec-xiii', num: 'XIII', title: 'Penalidades por Mora', text: null },
+                            { id: '', num: 'XIV', title: 'Resolución Contractual', text: 'Cualquiera de las partes puede resolver el contrato, de conformidad con el numeral 68.1 al 68.5 del artículo 68 de la Ley N° 32069, Ley General de Contrataciones Públicas, y el artículo 122 del Reglamento aprobado por D.S. N° 009-2025-EF.' },
+                            { id: '', num: 'XV', title: 'Sanciones', text: 'El proveedor se compromete a cumplir las obligaciones derivadas del contrato, siendo aplicable lo previsto según los artículos 87 al 92 de la Ley General de Contrataciones Públicas.' },
+                            { id: '', num: 'XVI', title: 'Aplicación Supletoria', text: 'A la Ley de Contrataciones y su Reglamento – Ley N° 32069 también se considera el Código Civil vigente, teniendo en cuenta ese orden de prelación.' },
+                            { id: '', num: 'XVII', title: 'Medidas de Seguridad en la Prestación del Servicio', text: 'No aplica.' },
+                            { id: '', num: 'XVIII', title: 'Solución de Controversias', text: 'Todas las controversias se resuelven mediante conciliación, conforme al numeral 81.3 del artículo 81 de la Ley N° 32069 y el Art. 330 del Reglamento.' },
+                            { id: 'sec-xix', num: 'XIX', title: 'Obligación Anticorrupción', text: 'EL CONTRATISTA declara y garantiza no haber ofrecido, negociado ni prometido ningún pago o incentivo ilegal a los evaluadores del proceso o cualquier servidor de la entidad. Se obliga a mantener una conducta proba e íntegra durante y después de la vigencia del contrato.' },
+                            { id: '', num: 'XX', title: 'Cláusula Antisoborno', text: 'El contratista declara conocer la Política antisoborno de la SUNASS. Se compromete a actuar con integridad y a abstenerse de ofrecer beneficio alguno a funcionarios públicos. Se compromete a denunciar cualquier intento de soborno a través del canal de denuncias de la SUNASS.' },
+                            { id: '', num: 'XXI', title: 'Cláusula Gestión de Riesgo', text: 'LAS PARTES realizan la gestión de riesgos de acuerdo con lo establecido en el presente contrato y sus documentos, con el fin de tomar decisiones informadas durante la ejecución contractual.' },
+                            { id: '', num: 'XXII', title: 'Cláusula de Vicios Ocultos', text: 'El contratista es responsable por la calidad ofrecida y los vicios ocultos por un plazo no menor de un año contado a partir de la conformidad otorgada por la entidad. Art. 69.2 literal c).' },
+                            { id: '', num: 'XXIII', title: 'Cláusula Modificación Contractual', text: 'Las partes pueden acordar modificaciones al contrato, siempre que permitan alcanzar su finalidad de manera oportuna y eficiente sin aumentar el monto ni desnaturalizar el requerimiento.' },
+                            { id: '', num: 'XXIV', title: 'Garantías', text: 'No aplica.' },
                           ] as { id: string; num: string; title: string; text: string | null }[]).map(clause => (
                             <section key={clause.num} id={clause.id || undefined}>
                               <h3 className="font-bold mb-2 uppercase" style={{ fontSize: '10pt' }}>
