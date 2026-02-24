@@ -1,5 +1,3 @@
-const MODEL_NAME = "gemini-3.1-pro-preview";
-
 export interface TDRData {
     organo: string;
     actividadPoi: string;
@@ -37,7 +35,6 @@ type GenerateTDRPayload = {
 };
 
 function getApiBaseUrl(): string {
-    // ✅ En Vite las env vars expuestas al browser deben iniciar con VITE_
     const envUrl = import.meta.env.VITE_API_URL as string | undefined;
     return envUrl?.trim() ? envUrl.trim() : "http://localhost:8080";
 }
@@ -56,7 +53,6 @@ function extractJson(text: string): string {
         .replace(/```/g, "")
         .trim();
 
-    // Intenta encontrar el primer { y el último }
     const start = cleaned.indexOf("{");
     const end = cleaned.lastIndexOf("}");
     if (start === -1 || end === -1 || end <= start) {
@@ -89,17 +85,14 @@ export async function generateTDR(
         body: JSON.stringify(payload),
     });
 
-    // Tu backend devuelve ResponseEntity<String>, por eso leemos texto sí o sí
     const text = await res.text();
 
-    // Si el status no es OK, intenta leer error en JSON o en texto
     if (!res.ok) {
         const maybeError = safeJsonParse<BackendError>(text);
         const msg = maybeError?.error || maybeError?.message || text || `Error ${res.status}`;
         throw new Error(msg);
     }
 
-    // OK: ahora intentamos parsear el JSON (aunque venga con fences o texto extra)
     const jsonStr = extractJson(text);
     const data = safeJsonParse<TDRData>(jsonStr);
 
@@ -109,7 +102,6 @@ export async function generateTDR(
         );
     }
 
-    // Validación mínima
     if (!data.organo || !data.denominacion || !Array.isArray(data.entregables)) {
         throw new Error("El JSON recibido no tiene el formato esperado de TDRData.");
     }
